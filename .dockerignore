@@ -1,0 +1,31 @@
+# Git
+.git
+.gitignore
+.github
+
+# Entornos virtuales
+.venv
+venv
+
+# Caché de Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+
+# Pruebas y cobertura
+tests
+.pytest_cache
+.coverage
+coverage.xml
+htmlcov
+
+# Configuración de desarrollo y CI
+.vscode
+.idea
+.env
+Jenkinsfile
+sonar-project.properties
+
+# Documentación
+README.md

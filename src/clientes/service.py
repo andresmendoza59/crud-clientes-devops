@@ -13,47 +13,66 @@ class ClienteService:
         self._ultimo_id = 0
 
     def crear_cliente(self, nombre: str, email: str) -> Cliente:
-        self._validar_nombre(nombre)
-        self._validar_email(email)
+        nombre_limpio = nombre.strip()
+        email_normalizado = email.strip().lower()
 
-        if self.repository.obtener_por_email(email) is not None:
-            raise ClienteYaExisteError(f"Ya existe un cliente con email {email}")
+        self._validar_nombre(nombre_limpio)
+        self._validar_email(email_normalizado)
+
+        if self.repository.obtener_por_email(email_normalizado) is not None:
+            raise ClienteYaExisteError(
+                f"Ya existe un cliente con email {email_normalizado}"
+            )
 
         self._ultimo_id += 1
         cliente = Cliente(
             id=self._ultimo_id,
-            nombre=nombre.strip(),
-            email=email.strip(),
+            nombre=nombre_limpio,
+            email=email_normalizado,
         )
         return self.repository.guardar(cliente)
 
     def obtener_cliente(self, cliente_id: int) -> Cliente:
         cliente = self.repository.obtener_por_id(cliente_id)
         if cliente is None:
-            raise ClienteNoEncontradoError(f"No existe cliente con id {cliente_id}")
+            raise ClienteNoEncontradoError(
+                f"No existe cliente con id {cliente_id}"
+            )
         return cliente
 
     def listar_clientes(self) -> list[Cliente]:
         return self.repository.listar()
 
-    def actualizar_cliente(self, cliente_id: int, nombre: str, email: str) -> Cliente:
+    def actualizar_cliente(
+        self,
+        cliente_id: int,
+        nombre: str,
+        email: str,
+    ) -> Cliente:
         cliente = self.obtener_cliente(cliente_id)
 
-        self._validar_nombre(nombre)
-        self._validar_email(email)
+        nombre_limpio = nombre.strip()
+        email_normalizado = email.strip().lower()
 
-        existente = self.repository.obtener_por_email(email)
+        self._validar_nombre(nombre_limpio)
+        self._validar_email(email_normalizado)
+
+        existente = self.repository.obtener_por_email(email_normalizado)
         if existente is not None and existente.id != cliente_id:
-            raise ClienteYaExisteError(f"Ya existe un cliente con email {email}")
+            raise ClienteYaExisteError(
+                f"Ya existe un cliente con email {email_normalizado}"
+            )
 
-        cliente.nombre = nombre.strip()
-        cliente.email = email.strip()
+        cliente.nombre = nombre_limpio
+        cliente.email = email_normalizado
         return self.repository.guardar(cliente)
 
     def eliminar_cliente(self, cliente_id: int) -> bool:
         eliminado = self.repository.eliminar(cliente_id)
         if not eliminado:
-            raise ClienteNoEncontradoError(f"No existe cliente con id {cliente_id}")
+            raise ClienteNoEncontradoError(
+                f"No existe cliente con id {cliente_id}"
+            )
         return True
 
     @staticmethod
@@ -66,4 +85,6 @@ class ClienteService:
         if not email or not email.strip():
             raise ValidacionClienteError("El email es obligatorio")
         if "@" not in email or "." not in email:
-            raise ValidacionClienteError("El email no tiene un formato válido")
+            raise ValidacionClienteError(
+                "El email no tiene un formato válido"
+            )
