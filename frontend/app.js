@@ -194,6 +194,16 @@ botonCancelar.addEventListener("click", () => {
     mostrarMensaje("");
 });
 
-botonActualizar.addEventListener("click", cargarClientes);
+botonActualizar.addEventListener(
+    "click",
+    cargarClientes,
+);
 
-cargarClientes();
+await cargarClientes();
+
+export {
+    cargarClientes,
+    limpiarFormulario,
+    mostrarClientes,
+    solicitar,
+};
