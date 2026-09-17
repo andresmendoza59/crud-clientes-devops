@@ -1,6 +1,10 @@
+from pathlib import Path
+
 from fastapi import FastAPI, Response, status
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
+
 
 from .exceptions import (
     ClienteNoEncontradoError,
@@ -28,6 +32,14 @@ app = FastAPI(
     title="CRUD Clientes",
     description="API REST para la gestión de clientes",
     version="1.0.0",
+)
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
+FRONTEND_DIR = PROJECT_ROOT / "frontend"
+
+app.mount(
+    "/static",
+    StaticFiles(directory=FRONTEND_DIR),
+    name="static",
 )
 
 repository = ClienteRepository()
@@ -75,6 +87,9 @@ async def manejar_error_validacion(
         content={"detail": str(exception)},
     )
 
+@app.get("/", include_in_schema=False)
+def mostrar_pagina_principal() -> FileResponse:
+    return FileResponse(FRONTEND_DIR / "index.html")
 
 @app.get("/health")
 def verificar_salud() -> dict[str, str]:

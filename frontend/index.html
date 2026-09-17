@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de clientes</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <script src="/static/app.js" type="module"></script>
+</head>
+<body>
+    <header class="encabezado">
+        <div>
+            <p class="etiqueta">CRUD Clientes DevOps</p>
+            <h1>Gestión de clientes</h1>
+            <p>Aplicación desplegada con FastAPI, Docker, Jenkins y SonarQube.</p>
+        </div>
+
+        <a class="enlace-api" href="/docs" target="_blank">
+            Ver documentación API
+        </a>
+    </header>
+
+    <main class="contenedor">
+        <section class="tarjeta formulario-tarjeta">
+            <div class="titulo-seccion">
+                <div>
+                    <p class="etiqueta">Formulario</p>
+                    <h2 id="titulo-formulario">Registrar cliente</h2>
+                </div>
+            </div>
+
+            <form id="formulario-cliente">
+                <input id="cliente-id" type="hidden">
+
+                <label for="nombre">Nombre</label>
+                <input
+                    id="nombre"
+                    name="nombre"
+                    type="text"
+                    maxlength="100"
+                    placeholder="Ejemplo: Ana Ramírez"
+                    required
+                >
+
+                <label for="email">Correo electrónico</label>
+                <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    maxlength="254"
+                    placeholder="ana@mail.com"
+                    required
+                >
+
+                <div class="acciones-formulario">
+                    <button id="boton-guardar" type="submit">
+                        Guardar cliente
+                    </button>
+
+                    <button
+                        id="boton-cancelar"
+                        class="secundario oculto"
+                        type="button"
+                    >
+                        Cancelar edición
+                    </button>
+                </div>
+            </form>
+
+            <p id="mensaje" class="mensaje" role="status"></p>
+        </section>
+
+        <section class="tarjeta listado-tarjeta">
+            <div class="titulo-seccion">
+                <div>
+                    <p class="etiqueta">Registros</p>
+                    <h2>Clientes registrados</h2>
+                </div>
+
+                <button id="boton-actualizar" class="secundario" type="button">
+                    Actualizar lista
+                </button>
+            </div>
+
+            <div class="tabla-contenedor">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Correo electrónico</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-clientes"></tbody>
+                </table>
+            </div>
+
+            <p id="lista-vacia" class="estado-vacio oculto">
+                No hay clientes registrados.
+            </p>
+        </section>
+    </main>
+
+    <footer>
+        <p>CRUD Clientes · Pipeline CI/CD</p>
+    </footer>
+</body>
+</html>

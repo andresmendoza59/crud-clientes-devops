@@ -24,29 +24,48 @@ pipeline {
                     python3 --version
                     docker --version
                     java -version
+                    docker run --rm node:22-alpine node --version
                 '''
             }
         }
 
-        stage('Install Dependencies') {
+        stage('Install Backend Dependencies') {
             steps {
                 sh '''
                     set -e
                     python3 -m venv --clear "$VENV_DIR"
                     . "$VENV_DIR/bin/activate"
                     python -m pip install --upgrade pip
-                    python -m pip install -r requirements.txt
+                    python -m pip install \
+                        -r backend/requirements.txt
                 '''
             }
         }
 
-        stage('Run Tests with Coverage') {
+        stage('Backend Tests') {
             steps {
                 sh '''
                     set -e
                     . "$VENV_DIR/bin/activate"
+                    cd backend
                     python -m pytest \
-                        --junitxml=test-results.xml
+                        --junitxml=../backend-test-results.xml
+                '''
+            }
+        }
+
+        stage('Frontend Tests') {
+            steps {
+                sh '''
+                    set -e
+
+                    docker run --rm \
+                        --user "$(id -u):$(id -g)" \
+                        -e HOME=/tmp \
+                        -v jenkins_home:/var/jenkins_home \
+                        -w "$WORKSPACE/frontend" \
+                        node:22-alpine \
+                        sh -c "npm ci && npm run test:coverage"
                 '''
             }
         }
@@ -62,16 +81,7 @@ pipeline {
                     withSonarQubeEnv('SonarQube') {
                         sh """
                             set -e
-                            . "${env.VENV_DIR}/bin/activate"
-
-                            "${scannerHome}/bin/sonar-scanner" \
-                                -Dsonar.projectKey="${env.SONAR_PROJECT_KEY}" \
-                                -Dsonar.projectName="${env.SONAR_PROJECT_NAME}" \
-                                -Dsonar.sources=src \
-                                -Dsonar.tests=tests \
-                                -Dsonar.python.version=3.13 \
-                                -Dsonar.python.coverage.reportPaths=coverage.xml \
-                                -Dsonar.sourceEncoding=UTF-8
+                            "${scannerHome}/bin/sonar-scanner"
                         """
                     }
                 }
@@ -99,12 +109,13 @@ pipeline {
             }
         }
 
-        stage('Deploy API') {
+        stage('Deploy Application') {
             steps {
                 sh '''
                     set -e
 
-                    docker rm -f "$CONTAINER_NAME" 2>/dev/null || true
+                    docker rm -f "$CONTAINER_NAME" \
+                        2>/dev/null || true
 
                     docker run -d \
                         --name "$CONTAINER_NAME" \
@@ -115,7 +126,7 @@ pipeline {
             }
         }
 
-        stage('Verify Container Health') {
+        stage('Verify Deployment') {
             steps {
                 sh '''
                     set -e
@@ -123,9 +134,10 @@ pipeline {
                     for attempt in $(seq 1 12); do
                         HEALTH_STATUS=$(docker inspect \
                             --format='{{.State.Health.Status}}' \
-                            "$CONTAINER_NAME" 2>/dev/null || true)
+                            "$CONTAINER_NAME" \
+                            2>/dev/null || true)
 
-                        echo "Estado del contenedor: $HEALTH_STATUS"
+                        echo "Estado: $HEALTH_STATUS"
 
                         if [ "$HEALTH_STATUS" = "healthy" ]; then
                             exit 0
@@ -150,12 +162,16 @@ pipeline {
     post {
         always {
             junit(
-                testResults: 'test-results.xml',
+                testResults: 'backend-test-results.xml',
                 allowEmptyResults: true
             )
 
             archiveArtifacts(
-                artifacts: 'coverage.xml,test-results.xml',
+                artifacts: [
+                    'backend/coverage.xml',
+                    'frontend/coverage/lcov.info',
+                    'backend-test-results.xml'
+                ].join(','),
                 fingerprint: true,
                 allowEmptyArchive: true
             )
@@ -163,7 +179,8 @@ pipeline {
 
         failure {
             sh '''
-                docker logs "$CONTAINER_NAME" 2>/dev/null || true
+                docker logs "$CONTAINER_NAME" \
+                    2>/dev/null || true
             '''
         }
     }

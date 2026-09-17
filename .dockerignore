@@ -29,3 +29,12 @@ sonar-project.properties
 
 # Documentación
 README.md
+
+backend/tests/
+backend/.pytest_cache/
+backend/coverage.xml
+frontend/node_modules/
+frontend/tests/
+frontend/coverage/
+jenkins-image/
+backups/

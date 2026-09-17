@@ -1,112 +1,184 @@
 # CRUD Clientes DevOps
 
-API REST para la gestión de clientes desarrollada con Python y FastAPI. El proyecto incorpora pruebas automatizadas, cobertura, análisis estático con SonarQube, Quality Gate, integración continua con Jenkins y despliegue mediante Docker.
+Aplicación web para la gestión de clientes, desarrollada con FastAPI y JavaScript. El proyecto incorpora pruebas automatizadas independientes para backend y frontend, cobertura, análisis estático con SonarQube, Quality Gate, integración continua con Jenkins y despliegue con Docker.
 
 ## Funcionalidades
 
-- Crear clientes.
-- Consultar todos los clientes.
-- Consultar un cliente por identificador.
-- Actualizar clientes.
+- Registrar clientes.
+- Listar clientes.
+- Consultar clientes por identificador.
+- Editar clientes.
 - Eliminar clientes.
 - Validar nombres y correos electrónicos.
 - Evitar registros con correos duplicados.
-- Verificar el estado de la aplicación.
+- Consultar el estado de la aplicación.
+- Probar la API mediante Swagger UI.
 
 ## Tecnologías
+
+### Backend
 
 - Python 3.13
 - FastAPI
 - Uvicorn
 - Pytest
 - Pytest-cov
+
+### Frontend
+
+- HTML5
+- CSS3
+- JavaScript
+- Node.js 22
+- Vitest
+- jsdom
+
+### DevOps
+
+- GitHub
+- Jenkins
 - SonarQube
 - PostgreSQL
-- Jenkins
 - Docker
 
-## Estructura del proyecto
+## Estructura
 
 ```text
 crud-clientes-devops/
-├── src/
-│   └── clientes/
-│       ├── api.py
-│       ├── exceptions.py
-│       ├── models.py
-│       ├── repository.py
-│       └── service.py
-├── tests/
-│   ├── test_api.py
-│   ├── test_repository.py
-│   └── test_service.py
+├── backend/
+│   ├── src/
+│   │   └── clientes/
+│   │       ├── api.py
+│   │       ├── exceptions.py
+│   │       ├── models.py
+│   │       ├── repository.py
+│   │       └── service.py
+│   ├── tests/
+│   │   ├── test_api.py
+│   │   ├── test_repository.py
+│   │   └── test_service.py
+│   ├── pytest.ini
+│   └── requirements.txt
+├── frontend/
+│   ├── tests/
+│   │   └── app.test.js
+│   ├── app.js
+│   ├── index.html
+│   ├── package.json
+│   ├── package-lock.json
+│   ├── styles.css
+│   └── vitest.config.js
 ├── jenkins-image/
 │   └── Dockerfile
+├── .dockerignore
+├── .gitignore
 ├── Dockerfile
 ├── Jenkinsfile
-├── pytest.ini
-├── requirements.txt
+├── README.md
 └── sonar-project.properties
 ```
 
-## Crear el entorno virtual
+## Preparar el backend
+
+Crear el entorno virtual:
 
 ```powershell
 python -m venv .venv
 ```
 
-## Activar el entorno en Windows PowerShell
+Activarlo en PowerShell:
 
 ```powershell
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned
 .\.venv\Scripts\Activate.ps1
 ```
 
-## Instalar dependencias
+Instalar dependencias:
 
 ```powershell
 python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
+python -m pip install -r backend/requirements.txt
 ```
 
-## Ejecutar las pruebas
+## Ejecutar pruebas del backend
+
+Desde la raíz del proyecto:
 
 ```powershell
+Set-Location backend
 python -m pytest
+Set-Location ..
 ```
 
-El proyecto contiene 26 pruebas automatizadas.
+La configuración exige una cobertura mínima del 90 % y genera:
 
-## Ejecutar pruebas con cobertura
+```text
+backend/coverage.xml
+```
 
-La configuración de cobertura se encuentra en `pytest.ini`. Para ejecutar las pruebas y generar `coverage.xml`:
+## Ejecutar pruebas del frontend
+
+Las pruebas se pueden ejecutar mediante Node.js en Docker:
 
 ```powershell
-python -m pytest
+docker run --rm `
+    -v "${PWD}\frontend:/app" `
+    -w /app `
+    node:22-alpine `
+    npm ci
 ```
 
-La cobertura actual es aproximadamente del 99 % y el mínimo exigido es del 90 %.
+Ejecutar las pruebas:
 
-## Ejecutar la API localmente
+```powershell
+docker run --rm `
+    -v "${PWD}\frontend:/app" `
+    -w /app `
+    node:22-alpine `
+    npm test
+```
+
+Ejecutar pruebas con cobertura:
+
+```powershell
+docker run --rm `
+    -v "${PWD}\frontend:/app" `
+    -w /app `
+    node:22-alpine `
+    npm run test:coverage
+```
+
+El informe para SonarQube se genera en:
+
+```text
+frontend/coverage/lcov.info
+```
+
+## Ejecutar la aplicación localmente
 
 ```powershell
 python -m uvicorn clientes.api:app `
     --host 127.0.0.1 `
     --port 8000 `
-    --app-dir src
+    --app-dir backend/src `
+    --reload
 ```
 
 Servicios disponibles:
 
-- API: http://localhost:8000
-- Estado: http://localhost:8000/health
-- Swagger UI: http://localhost:8000/docs
-- OpenAPI: http://localhost:8000/openapi.json
+| Servicio | Dirección |
+|---|---|
+| Interfaz web | http://localhost:8000/ |
+| Estado de la API | http://localhost:8000/health |
+| Swagger UI | http://localhost:8000/docs |
+| OpenAPI | http://localhost:8000/openapi.json |
+| Clientes | http://localhost:8000/clientes |
 
 ## Endpoints
 
 | Método | Ruta | Descripción |
 |---|---|---|
+| GET | `/` | Mostrar la interfaz web |
 | GET | `/health` | Verificar el estado de la API |
 | POST | `/clientes` | Crear un cliente |
 | GET | `/clientes` | Listar clientes |
@@ -114,30 +186,13 @@ Servicios disponibles:
 | PUT | `/clientes/{cliente_id}` | Actualizar un cliente |
 | DELETE | `/clientes/{cliente_id}` | Eliminar un cliente |
 
-## Ejemplo de creación de un cliente
-
-```powershell
-$clienteJson = @{
-    nombre = "Ana Ramírez"
-    email  = "ana@mail.com"
-} | ConvertTo-Json -Compress
-
-$clienteUtf8 = [System.Text.Encoding]::UTF8.GetBytes($clienteJson)
-
-Invoke-RestMethod `
-    -Method Post `
-    -Uri "http://localhost:8000/clientes" `
-    -ContentType "application/json; charset=utf-8" `
-    -Body $clienteUtf8
-```
-
 ## Construir la imagen Docker
 
 ```powershell
 docker build -t crud-clientes-api .
 ```
 
-## Ejecutar la aplicación con Docker
+## Ejecutar con Docker
 
 ```powershell
 docker run -d `
@@ -147,52 +202,56 @@ docker run -d `
     crud-clientes-api
 ```
 
-Verificar el contenedor:
+Verificar:
 
 ```powershell
 docker ps --filter "name=crud-clientes-api-container"
-docker inspect crud-clientes-api-container --format '{{.State.Health.Status}}'
+
+docker inspect crud-clientes-api-container `
+    --format '{{.State.Health.Status}}'
 ```
 
-## Integración con SonarQube
+## SonarQube
 
-El análisis utiliza:
+Configuración del proyecto:
 
 ```text
 Project key: crud-clientes-devops
-SonarQube URL: http://localhost:9000
+Project name: CRUD Clientes DevOps
 ```
 
-El token de SonarQube se almacena como credencial secreta en Jenkins y no debe incluirse en el repositorio.
+SonarQube analiza:
 
-El pipeline envía a SonarQube:
+- Código Python del backend.
+- Código JavaScript del frontend.
+- Pruebas del backend.
+- Pruebas del frontend.
+- Cobertura Python mediante `coverage.xml`.
+- Cobertura JavaScript mediante `lcov.info`.
 
-- Código fuente.
-- Pruebas.
-- Cobertura.
-- Resultados del análisis estático.
-- Estado del Quality Gate.
+El token se almacena como credencial secreta en Jenkins y no debe guardarse en GitHub.
 
 ## Pipeline de Jenkins
 
-El `Jenkinsfile` ejecuta las siguientes etapas:
+El pipeline ejecuta:
 
-1. Verificación del entorno.
-2. Instalación de dependencias.
-3. Pruebas y cobertura.
-4. Análisis con SonarQube.
-5. Validación del Quality Gate.
-6. Construcción de la imagen Docker.
-7. Despliegue del contenedor.
-8. Verificación de salud.
+1. Verificación de Python, Java, Docker y Node.js.
+2. Instalación de dependencias del backend.
+3. Pruebas y cobertura del backend.
+4. Pruebas y cobertura del frontend.
+5. Análisis con SonarQube.
+6. Validación del Quality Gate.
+7. Construcción de la imagen Docker.
+8. Despliegue de la aplicación.
+9. Verificación de salud del contenedor.
 
-La construcción y el despliegue solamente continúan cuando las pruebas y el Quality Gate son aprobados.
+El despliegue solamente continúa si las pruebas y el Quality Gate son aprobados.
 
-## Servicios del entorno DevOps
+## Servicios DevOps
 
 | Servicio | Dirección |
 |---|---|
-| API | http://localhost:8000 |
+| Aplicación | http://localhost:8000 |
 | Swagger UI | http://localhost:8000/docs |
 | Jenkins | http://localhost:8080 |
 | SonarQube | http://localhost:9000 |
