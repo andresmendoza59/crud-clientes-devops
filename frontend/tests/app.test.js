@@ -68,7 +68,7 @@ function construirDocumento() {
             Actualizar
         </button>
 
-        <p id="mensaje"></p>
+        <output id="mensaje"></output>
         <p id="lista-vacia" class="oculto"></p>
 
         <table>
