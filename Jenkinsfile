@@ -1,5 +1,10 @@
 pipeline {
-    agent any
+    agent {
+        dockerfile {
+            filename 'Dockerfile.verify'
+            args '-v /var/run/docker.sock:/var/run/docker.sock -u root'
+        }
+    }
 
     options {
         timestamps()
@@ -18,12 +23,6 @@ pipeline {
 
     stages {
         stage('Verify Environment') {
-            agent {
-                dockerfile {
-                    filename 'Dockerfile.verify'
-                    args '-v /var/run/docker.sock:/var/run/docker.sock -u root'
-                }
-            }
             steps {
                 sh '''
                     set -e
