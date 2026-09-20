@@ -68,7 +68,7 @@ pipeline {
                     docker run --rm \
                         --user "$(id -u):$(id -g)" \
                         -e HOME=/tmp \
-                        -v "$WORKSPACE:/workspace" \
+                        -v "${PWD}/frontend:/app" \
                         -w "$WORKSPACE/frontend" \
                         node:22-alpine \
                         sh -c "npm ci && npm run test:coverage"
