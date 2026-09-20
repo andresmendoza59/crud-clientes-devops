@@ -1,7 +1,0 @@
-FROM ubuntu:22.04
-
-RUN apt-get update && apt-get install -y \
-    python3 \
-    openjdk-17-jre-headless \
-    docker.io \
-    && rm -rf /var/lib/apt/lists/*
