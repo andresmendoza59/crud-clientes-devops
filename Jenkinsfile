@@ -3,7 +3,7 @@ pipeline {
         dockerfile {
             filename 'Dockerfile'
             dir 'jenkins-image'
-            args '-v /var/run/docker.sock:/var/run/docker.sock -v jenkins_home:/var/jenkins_home -u root'
+            args '-v /var/run/docker.sock:/var/run/docker.sock -u root'
         }
     }
 
@@ -78,18 +78,11 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                script {
-                    def scannerHome = tool(
-                        name: 'sonar-scanner',
-                        type: 'hudson.plugins.sonar.SonarRunnerInstallation'
-                    )
-
-                    withSonarQubeEnv('SonarQube') {
-                        sh """
-                            set -e
-                            "${scannerHome}/bin/sonar-scanner"
-                        """
-                    }
+                withSonarQubeEnv('SonarQube') {
+                    sh """
+                        set -e
+                        sonar-scanner
+                    """
                 }
             }
         }
