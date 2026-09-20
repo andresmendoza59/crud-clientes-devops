@@ -1,7 +1,8 @@
 pipeline {
     agent {
         dockerfile {
-            filename 'Dockerfile.verify'
+            filename 'Dockerfile'
+            dir 'jenkins-image'
             args '-v /var/run/docker.sock:/var/run/docker.sock -u root'
         }
     }
