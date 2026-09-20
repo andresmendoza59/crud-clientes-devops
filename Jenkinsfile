@@ -79,10 +79,15 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv('SonarQube') {
-                    sh """
+                    sh '''
                         set -e
-                        sonar-scanner
-                    """
+                        sonar-scanner \
+                            -Dsonar.projectKey="$SONAR_PROJECT_KEY" \
+                            -Dsonar.projectName="$SONAR_PROJECT_NAME" \
+                            -Dsonar.sources="backend,frontend" \
+                            -Dsonar.python.coverage.reportPaths="backend/coverage.xml" \
+                            -Dsonar.javascript.lcov.reportPaths="frontend/coverage/lcov.info"
+                    '''
                 }
             }
         }
