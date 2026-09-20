@@ -3,7 +3,7 @@ pipeline {
         dockerfile {
             filename 'Dockerfile'
             dir 'jenkins-image'
-            args '-v /var/run/docker.sock:/var/run/docker.sock -u root'
+            args '-v /var/run/docker.sock:/var/run/docker.sock -v jenkins_home:/var/jenkins_home -u root'
         }
     }
 
