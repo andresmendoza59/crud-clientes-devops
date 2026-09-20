@@ -69,7 +69,7 @@ pipeline {
                         --user "$(id -u):$(id -g)" \
                         -e HOME=/tmp \
                         -v "${PWD}/frontend:/app" \
-                        -w "$WORKSPACE/frontend" \
+                        -w "/app" \
                         node:22-alpine \
                         sh -c "npm ci && npm run test:coverage"
                 '''
