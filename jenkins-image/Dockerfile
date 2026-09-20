@@ -8,6 +8,7 @@ RUN apt-get update \
         python3-venv \
         python3-pip \
         docker-cli \
+        unzip \
         git \
         curl \
         ca-certificates \
